@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import apiServerClient from '@/lib/apiServerClient.js';
+import pb from '@/lib/pocketbaseClient.js';
 import { toast } from 'sonner';
 
 const AuthContext = createContext();
@@ -29,19 +30,20 @@ export function AuthProvider({ children }) {
           if (res.ok) {
             const data = await res.json();
             setCurrentUser(data.user);
-            // If the backend returns permissions in the user object, set them here
+            pb.authStore.save(token, data.user);
             if (data.user?.permissions) {
               setPermissions(data.user.permissions);
             }
           } else {
-            // Token is invalid or expired
             localStorage.removeItem('auth_token');
+            pb.authStore.clear();
             setCurrentUser(null);
             setPermissions([]);
           }
         } catch (error) {
           console.error('[AuthContext] Error restoring session:', error);
           localStorage.removeItem('auth_token');
+          pb.authStore.clear();
           setCurrentUser(null);
           setPermissions([]);
         }
@@ -68,10 +70,10 @@ export function AuthProvider({ children }) {
       
       const data = await res.json();
       
-      // Store token and update state
       localStorage.setItem('auth_token', data.token);
+      pb.authStore.save(data.token, data.user);
       setCurrentUser(data.user);
-      
+
       if (data.user?.permissions) {
         setPermissions(data.user.permissions);
       }
@@ -99,6 +101,7 @@ export function AuthProvider({ children }) {
       }
     } finally {
       localStorage.removeItem('auth_token');
+      pb.authStore.clear();
       setCurrentUser(null);
       setPermissions([]);
       if (reason) {
