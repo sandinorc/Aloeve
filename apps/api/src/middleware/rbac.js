@@ -2,9 +2,11 @@ import 'dotenv/config';
 import pb from '../utils/pocketbaseClient.js';
 import logger from '../utils/logger.js';
 
+const PB_URL = process.env.POCKETBASE_URL;
+
 /**
- * Middleware to authenticate requests using Horizons JWT tokens.
- * Validates the Bearer token by calling the Horizons /auth/me endpoint.
+ * Middleware to authenticate requests using PocketBase JWT tokens.
+ * Validates the Bearer token by calling PocketBase's auth-refresh endpoint.
  */
 export const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
@@ -27,10 +29,10 @@ export const authMiddleware = async (req, res, next) => {
   }
 
   try {
-    logger.info(`Validating token with Horizons API: ${token.substring(0, 10)}...`);
+    logger.info(`Validating token with PocketBase: ${token.substring(0, 10)}...`);
 
-    const response = await fetch(`${process.env.HORIZONS_API_URL}/auth/me`, {
-      method: 'GET',
+    const response = await fetch(`${PB_URL}/api/collections/usuarios/auth-refresh`, {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -42,8 +44,8 @@ export const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ error: 'Unauthorized - Invalid or expired token' });
     }
 
-    const userData = await response.json();
-    req.user = userData.user;
+    const authData = await response.json();
+    req.user = authData.record;
 
     logger.info(`Authentication successful for user ${req.user?.id || 'unknown'}`);
     next();

@@ -3,9 +3,10 @@ import logger from '../utils/logger.js';
 
 const router = express.Router();
 
+const PB_URL = process.env.POCKETBASE_URL;
+
 /**
  * POST /auth/login
- * Authenticate user with email and password against Horizons backend
  * Request: { email, password }
  * Response: { user, token }
  */
@@ -18,56 +19,49 @@ router.post('/login', async (req, res) => {
 
   logger.info(`[auth] Login attempt for email: ${email}`);
 
-  // Call Horizons backend to authenticate
-  const response = await fetch(`${process.env.HORIZONS_API_URL}/auth/login`, {
+  const response = await fetch(`${PB_URL}/api/collections/usuarios/auth-with-password`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identity: email, password }),
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
+    const body = await response.json().catch(() => ({}));
+    if (response.status === 400 || response.status === 401) {
       logger.warn(`[auth] Login failed for email: ${email} - Invalid credentials`);
-      throw new Error('Invalid email or password');
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
     logger.error(`[auth] Login failed for email: ${email} - Status ${response.status}`);
-    throw new Error(`Authentication failed: ${response.statusText}`);
+    return res.status(response.status).json({ error: body.message || 'Authentication failed' });
   }
 
   const authData = await response.json();
 
-  logger.info(`[auth] Login successful for user: ${authData.user?.id || 'unknown'}`);
+  logger.info(`[auth] Login successful for user: ${authData.record?.id || 'unknown'}`);
 
   res.json({
-    user: authData.user,
+    user: authData.record,
     token: authData.token,
   });
 });
 
 /**
  * POST /auth/logout
- * Logout current user (invalidate token)
  */
 router.post('/logout', async (req, res) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
 
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    logger.info(`[auth] Logout for token: ${token.substring(0, 10)}...`);
+    logger.info(`[auth] Logout for token: ${authHeader.substring(7, 17)}...`);
   } else {
     logger.info(`[auth] Logout without token`);
   }
 
-  // Token invalidation is handled by the client (removing token from storage)
-  // No need to call backend for logout
   res.json({ message: 'Logged out successfully' });
 });
 
 /**
  * GET /auth/me
- * Get current authenticated user
  * Requires valid Bearer token in Authorization header
  */
 router.get('/me', async (req, res) => {
@@ -92,9 +86,8 @@ router.get('/me', async (req, res) => {
 
   logger.info(`[auth] Fetching user profile with token: ${token.substring(0, 10)}...`);
 
-  // Call Horizons backend to get user data
-  const response = await fetch(`${process.env.HORIZONS_API_URL}/auth/me`, {
-    method: 'GET',
+  const response = await fetch(`${PB_URL}/api/collections/usuarios/auth-refresh`, {
+    method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -104,18 +97,18 @@ router.get('/me', async (req, res) => {
   if (!response.ok) {
     if (response.status === 401) {
       logger.warn('[auth] Token validation failed - Invalid or expired token');
-      throw new Error('Unauthorized - Invalid or expired token');
+      return res.status(401).json({ error: 'Unauthorized - Invalid or expired token' });
     }
     logger.error(`[auth] User profile fetch failed - Status ${response.status}`);
-    throw new Error(`Failed to fetch user profile: ${response.statusText}`);
+    return res.status(response.status).json({ error: 'Failed to fetch user profile' });
   }
 
   const userData = await response.json();
 
-  logger.info(`[auth] User profile retrieved: ${userData.user?.id || 'unknown'}`);
+  logger.info(`[auth] User profile retrieved: ${userData.record?.id || 'unknown'}`);
 
   res.json({
-    user: userData.user,
+    user: userData.record,
   });
 });
 
