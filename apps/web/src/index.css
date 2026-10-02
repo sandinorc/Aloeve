@@ -1,0 +1,237 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@layer base {
+  :root {
+    /* Aloeve Brand Tokens */
+    --background: 36 33% 96%; /* Crema #F8F5F0 */
+    --foreground: 240 10% 15%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 15%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 15%;
+    
+    --primary: 254 68% 57%; /* Morado #6B47DC */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 40 58% 51%; /* Dorado #C9963A */
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent: 161 69% 36%; /* Teal #1D9E75 */
+    --accent-foreground: 0 0% 100%;
+    
+    --muted: 36 20% 90%;
+    --muted-foreground: 240 5% 45%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 36 20% 85%;
+    --input: 36 20% 85%;
+    --ring: 254 68% 57%;
+    
+    --radius: 0.5rem; /* 8px */
+
+    /* POS Category Tokens */
+    --pos-wine: 353 42% 32%;
+    --pos-coffee: 25 33% 33%;
+    --pos-paint: 262 83% 58%;
+    --pos-materials: 215 16% 47%;
+
+    /* Facilitator Specialty Tokens */
+    --spec-yoga: 199 89% 48%; /* Blue */
+    --spec-pilates: 271 81% 56%; /* Purple */
+    --spec-meditation: 160 84% 39%; /* Green */
+    --spec-fitness: 348 83% 47%; /* Red */
+    --spec-dance: 326 100% 74%; /* Pink */
+    --spec-arts: 35 92% 53%; /* Orange */
+    --spec-default: 215 16% 47%; /* Slate */
+
+    /* Footer Tokens */
+    --footer-bg: 240 10% 10%;
+    --footer-fg: 240 5% 85%;
+    --footer-border: 240 10% 20%;
+  }
+
+  .dark {
+    --background: 240 10% 10%;
+    --foreground: 36 33% 96%;
+    
+    --card: 240 10% 13%;
+    --card-foreground: 36 33% 96%;
+    
+    --popover: 240 10% 13%;
+    --popover-foreground: 36 33% 96%;
+    
+    --primary: 254 68% 65%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 40 58% 60%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent: 161 69% 45%;
+    --accent-foreground: 0 0% 100%;
+    
+    --muted: 240 10% 18%;
+    --muted-foreground: 240 5% 65%;
+    
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 240 10% 22%;
+    --input: 240 10% 22%;
+    --ring: 254 68% 65%;
+
+    /* POS Category Tokens (Dark Mode Adjustments) */
+    --pos-wine: 353 42% 45%;
+    --pos-coffee: 25 33% 45%;
+    --pos-paint: 262 83% 65%;
+    --pos-materials: 215 16% 60%;
+
+    /* Facilitator Specialty Tokens (Dark Mode) */
+    --spec-yoga: 199 89% 60%;
+    --spec-pilates: 271 81% 65%;
+    --spec-meditation: 160 84% 45%;
+    --spec-fitness: 348 83% 60%;
+    --spec-dance: 326 100% 80%;
+    --spec-arts: 35 92% 60%;
+    --spec-default: 215 16% 60%;
+
+    /* Footer Tokens (Dark Mode) */
+    --footer-bg: 240 10% 6%;
+    --footer-fg: 240 5% 80%;
+    --footer-border: 240 10% 15%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Outfit', system-ui, sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+  
+  /* Table alternating rows styling */
+  tbody tr:nth-child(even) {
+    @apply bg-white/50 dark:bg-white/5;
+  }
+  
+  /* Smooth transitions for interactive elements */
+  a, button, input, select, textarea {
+    @apply transition-all duration-200;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+@layer components {
+  /* Payment Status Badges */
+  .badge-pagado {
+    @apply bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800;
+  }
+  .badge-pendiente {
+    @apply bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800;
+  }
+  .badge-cancelado {
+    @apply bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700;
+  }
+}
+
+@media print {
+  body * { 
+    display: none !important; 
+  }
+
+  #receipt-print-content, #receipt-print-content * {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* Restore specific display types broken by the wildcard block rule */
+  #receipt-print-content .flex {
+    display: flex !important;
+  }
+  #receipt-print-content table {
+    display: table !important;
+  }
+  #receipt-print-content thead {
+    display: table-header-group !important;
+  }
+  #receipt-print-content tbody {
+    display: table-row-group !important;
+  }
+  #receipt-print-content tr {
+    display: table-row !important;
+  }
+  #receipt-print-content th, #receipt-print-content td {
+    display: table-cell !important;
+  }
+
+  #receipt-print-content { 
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm !important; 
+    padding: 10mm !important; 
+    margin: 0 !important; 
+    background: white !important; 
+    color: black !important;
+    font-family: Arial, sans-serif !important;
+  }
+
+  .receipt-print table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin: 10px 0; 
+  }
+
+  .receipt-print th, .receipt-print td { 
+    border-bottom: 1px dashed black; 
+    padding: 4px 0; 
+    text-align: left; 
+  }
+
+  .receipt-print .text-right {
+    text-align: right !important;
+  }
+
+  .receipt-print .receipt-header { 
+    font-size: 16px; 
+    font-weight: bold; 
+    text-align: center; 
+    margin-bottom: 15px; 
+  }
+
+  .receipt-print .receipt-total { 
+    font-size: 14px; 
+    font-weight: bold; 
+    margin-top: 15px; 
+  }
+}
